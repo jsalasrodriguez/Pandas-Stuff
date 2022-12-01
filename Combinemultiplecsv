@@ -1,0 +1,74 @@
+import pandas as pd
+import glob,os
+# for now it will only work with elementary schools will look to make it for JH and HS if required.
+def finish_dataframe(df):
+#This function will take the list of Dataframes created by clean_files() and will return a concatnated dataframe
+# with renamed and reordered the colums.
+        df = pd.concat(df, axis=1)
+        df.columns = df.columns.str.rstrip()
+        df.rename(
+                columns={'Robertson Road': 'Rob Rd', 'Alberta Martone': 'Martone', 'Catherine Everett': 'Everett',
+                         'Elihu Beard': 'Beard',
+                         'Harriette Kirschen': 'Kirschen', 'James Marshall': 'Marshall', 'John Fremont': 'Fremont',
+                         'John Muir': 'Muir',
+                         'Orville Wright': 'Wright', 'Robertson Road': 'Rob Road', 'Rose Avenue': 'Rose Ave',
+                         'William Garrison': 'Garrison'}, inplace=True)
+        df = df.reindex(
+                columns=['Item #', 'Claim', 'Target',
+                         'Item Difficulty', 'Standard', 'Beard', 'Bret Harte', 'Burbank', 'El Vista', 'Enslen',
+                         'Everett', 'Fairview', 'Franklin', 'Fremont', 'Garrison', 'Lakewood', 'Kirschen',
+                         'Marshall',
+                         'Muir', 'Martone', 'Rob Road', 'Rose Ave', 'Shackelford', 'Sonoma', 'Tuolumne', 'Wilson',
+                         'Wright'])
+        return df
+
+def clean_files(filepath):
+    dfs = []
+    # this function will loop over all of the csv files in the file location and will make a list of data frames
+    # drop the unwanted columns and rename the full credit column based on the school name.
+    count = 0
+    for f in filepath:
+            if count == 0:
+                    df = pd.read_csv(f)
+                    droppedColumns = ['AssessmentType', 'AssessmentName', 'Subject', '0', '1', '2']
+                    df.drop(droppedColumns, inplace=True, axis=1)
+                    schoolFileName = f.split("\\")[-1].replace('_', ' ').replace('-', ' ')                  
+                    schoolName = schoolFileName.split('Elementary')[0] 
+                    df.rename(columns={'Full Credit': schoolName}, inplace=True)
+                    dfs.append(df)
+                    count += 1
+            else:
+                    df = pd.read_csv(f)
+                    droppedColumns = ['AssessmentType', 'AssessmentName', 'Subject', '0', '1', '2']
+                    df.drop(droppedColumns, inplace=True, axis=1)
+                    schoolFileName = f.split("\\")[-1]
+                    schoolName = schoolFileName.split('Elementary')[0]
+                    df.rename(columns={'Full Credit': schoolName}, inplace=True)
+                    dropColumns = ['Item #', 'Claim', 'Target', 'Item Difficulty', 'Standard']
+                    df.drop(dropColumns, inplace=True, axis=1)
+                    dfs.append(df)
+    return dfs
+# use glob to get all the csv files in the folder
+# this is the path to the file keep the r before the  file name
+def main():
+# this is the main function and will take the file location grade and test type and save the csv to the file location 
+# as well as name the new data frame based on the grade and test type
+    print('Please copy and paste the file path')
+    file_location = input()
+    path = file_location
+    grade = input('What Grade is this report for? (# only)')
+    grade = 'Grade'+ grade
+    fileName = str(grade) + '_ReadInformationalText.csv'
+    # use glob to get all the csv files in the folder
+    # this is the path to the file keep the r before the  file name
+    csv_fileList = glob.glob(os.path.join(path, "*.csv"))
+    cleaned_file = clean_files(csv_fileList)
+
+    finished_df = finish_dataframe(cleaned_file)
+    complete_filePath = path +"\\"+ fileName
+    finished_df.to_csv(complete_filePath, index=False)
+    print('This is the location of your file')
+    print(path)
+    print('file is called: '+fileName)
+
+main()
