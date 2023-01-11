@@ -1,6 +1,7 @@
 import pandas as pd
 import glob,os
 # for now it will only work with elementary schools will look to make it for JH and HS if required.
+# 1/11 will now work with JH and HS need to make District Average column
 
 def hs_clean_files(filepath):
     def finish_dataframe(df):
