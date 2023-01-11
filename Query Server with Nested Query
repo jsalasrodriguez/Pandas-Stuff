@@ -1,0 +1,71 @@
+import urllib
+import pandas as pd
+import sqlalchemy as sal
+
+
+def convert_columnTofloat(df):
+    df = df
+    lookup_ids = df['Student ID']
+    student_ids = []
+    for f in lookup_ids:
+        student_ids.append(float(f))
+    return student_ids
+
+
+def sql_connection(parameters):
+    # this creates the connection to the SQL Server do not change
+    params = parameters
+    engine = sal.create_engine("mssql+pyodbc:///?odbc_connect={}".format(params))
+    return engine
+
+
+def SQL_query(t):
+    t = t
+    t = tuple(t)
+    print(t)
+    sql_statement = """
+           SELECT
+               r.[ID]
+              ,r.[STUDENTID]
+              ,r.[ENTRYDATE]
+              ,r.[ENTRYCODE]
+              ,r.[ENTRYCOMMENT]
+              ,r.[EXITDATE]
+              ,r.[EXITCODE]
+              ,r.[EXITCOMMENT]
+              ,r.[SCHOOLID]
+              ,r.[GRADE_LEVEL]
+              ,s.STUDENT_NUMBER
+           FROM [AttunityHS].[ps].[REENROLLMENTS] r
+           INNER JOIN [AttunityHS].[ps].[STUDENTS] s
+           ON r.STUDENTID = s.ID
+           INNER JOIN (SELECT MAX(r.GRADE_LEVEL) as Grade_Level, r.STUDENTID FROM [AttunityHS].[ps].[REENROLLMENTS] r 
+           WHERE r.SCHOOLID = 14 Group BY r.STUDENTID) Grade 
+           ON r.STUDENTID = Grade.STUDENTID AND Grade.Grade_Level = r.GRADE_LEVEL 
+           WHERE r.SCHOOLID = 14  AND s.STUDENT_NUMBER IN {}
+          """.format(t)
+    return sql_statement
+
+
+def main():
+    parameters = urllib.parse.quote_plus("DRIVER={SQL Server};"
+                                         "SERVER=reno-sqlis;"
+                                         "DATABASE=AttunityHS;"
+                                         "Trusted_Connection=yes")
+
+    connx = sql_connection(parameters)
+    path = r'C:\Users\salasrodriguez.j\OneDrive - Modesto City Schools\Desktop\Downey BretHarte\21-22 Downey Students.csv'
+    save_path = r'C:\Users\salasrodriguez.j\OneDrive - Modesto City Schools\Desktop\Downey BretHarte'
+    filename = '21-22 Query.csv'
+    complete_filepath = save_path + "\\" + filename
+    cohort = pd.read_csv(path)
+    print(cohort)
+    t = convert_columnTofloat(cohort)
+    print(t)
+    s = pd.read_sql(SQL_query(t), connx)
+    df = pd.DataFrame(s)
+    print(df)
+    df.to_csv(complete_filepath, index=False)
+
+
+main()
