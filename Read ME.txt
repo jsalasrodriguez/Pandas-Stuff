@@ -1,0 +1,13 @@
+Combo Class Python Script
+	Query returns Combo class students
+
+	Baseball card report from SWUN save as BBSwun.csv, script does not read column names other than Student Id 
+	so columns can have whatever name you want. Script creates a new column named SWUN Score to combine the scores into one column
+	the order of the SWUN Baseball report shoudl be Student Id, Current Grade, grades k-6 scores remeber to include grade 2 paper pencil
+	and grade 2 online. 
+	
+	Baseball card report from SWUN save as BBSwun.csv, for this report you need Student Id and Composite Level
+
+	The Script then joins the query, SWUN, and Dibels on Student Id.
+
+*** Note you can add future tests to track in the script by creating a new function you will then need join on Student Id to the other parts.
